@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/hari/Codes/C++/sdc/src/ekf/ekf.hpp
+boost/numeric/ublas/matrix.hpp
+-
+boost/numeric/ublas/io.hpp
+-
+cmath
+-
+invert_matrix.hpp
+/home/hari/Codes/C++/sdc/src/ekf/invert_matrix.hpp
+
+/home/hari/Codes/C++/sdc/src/ekf/ekf_utilities.cpp
+ekf.hpp
+/home/hari/Codes/C++/sdc/src/ekf/ekf.hpp
+
+/home/hari/Codes/C++/sdc/src/ekf/invert_matrix.hpp
+boost/numeric/ublas/matrix.hpp
+-
+boost/numeric/ublas/vector.hpp
+-
+boost/numeric/ublas/io.hpp
+-
+boost/numeric/ublas/vector_proxy.hpp
+-
+boost/numeric/ublas/matrix.hpp
+-
+boost/numeric/ublas/triangular.hpp
+-
+boost/numeric/ublas/lu.hpp
+-
+

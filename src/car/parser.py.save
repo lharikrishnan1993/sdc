@@ -1,0 +1,23 @@
+import pylab as plt
+
+f = open('data.txt', 'r')
+x_s = []
+y_s = []
+x_k = []
+y_k = []
+counter = 0;
+
+for line in f:
+    line = line.split(" ")
+    if len(x_k) < 20:
+	x_k.append(float(line[0]))
+	y_k.append(float(line[1]))
+    elif len(x_s) < 20:
+        x_s.append(float(line[0]))
+        y_s.append(float(line[1]))
+    	
+#simple, = plt.plot(x_s, y_s, 'b-', label = 'Simple')
+#kinematic, = plt.plot(x_k, y_k, 'r-', label = 'Kinematic')#plt.legend(handles=[simple, kinematic])
+plt.show()
+
+
