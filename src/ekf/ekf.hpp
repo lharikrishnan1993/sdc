@@ -37,7 +37,9 @@ class ekf
         ~ekf();
         void get_state(matrix<double>& xx);
         matrix<double> get_F( matrix <double>& control_vector, float del_t);
-        matrix <double> predicted_X( matrix <double>& control_vector, float del_t);
+        matrix<double> get_H( float del_t);
+        matrix<double> get_sensor_projected_state(matrix <double> &measurement_vector, float del_t);
+        matrix<double> predicted_X( matrix <double>& control_vector, float del_t);
         void step( matrix<double>& control_vector, matrix<double>& measurement_vector, float del_t);
 };
 

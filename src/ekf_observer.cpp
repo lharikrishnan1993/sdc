@@ -15,10 +15,36 @@
 
 #include "ekf_utilities.cpp"
 #include "car_utilities.cpp"
+//std::default_random_engine generator;
+
+double get_noisy_acc(double acc, double noise)
+{
+    std::normal_distribution<double> distribution(acc, noise);
+    return distribution(generator);
+}
+
+double get_noisy_phi(double phi, double noise)
+{
+    std::normal_distribution<double> distribution(phi, noise);
+    return distribution(generator);
+}
+
+matrix<double> get_measurement_vector(double acc, double phi, double noisy_orientation, double noise, double del_t)
+{
+    double noisy_acc = get_noisy_acc(acc, noise);
+    double noisy_phi = get_noisy_phi(phi, noise);
+    matrix <double> sensor_values(5,1);
+    sensor_values(0,0) = noisy_acc*cos(noisy_orientation);
+    sensor_values(1,0) = noisy_acc*sin(noisy_orientation);
+    sensor_values(2,0) = noisy_phi;
+    sensor_values(3,0) = noisy_acc;
+    sensor_values(4,0) = 1;
+    return sensor_values;
+}
 
 int main()
 {
-    Car s;
+/*    Car s;
 
     matrix<double> X(5,1);
     X(0,0) = 0;
@@ -73,8 +99,14 @@ int main()
         filter.step(control_vector, measurement_vector, del_t);
         i += del_t;
     }
+*/
 
     kinematic_bicycle c;
+
+    float time = 20.0;
+    float del_t = 0.01;
+    float acc = 0.3;
+    float phi = d2r(10.0);
 
     matrix<double> Xi(5,1);
     Xi(0,0) = 0;
@@ -84,7 +116,7 @@ int main()
     Xi(4,0) = 0;
 
     zero_matrix<double> Pi (5, 5);
-    zero_matrix<double> Hi (5, 5);
+    zero_matrix<double> hi (5, 5);
 
     matrix<double> Qi(5,5);
     for (unsigned i = 0; i < Qi.size1 (); ++ i)
@@ -98,17 +130,16 @@ int main()
             if (i==j) Ri (i, j) = 0.000005;
             else Ri(i,j) = 0;
 
-    acc = 0.3;
-    phi = d2r(10.0);
     matrix<double> control_vectori(2,1);
     control_vectori(0,0) = acc;
     control_vectori(1,0) = phi;
 
     matrix<double> measurement_vectori(5,1);
     matrix<double> true_vectori(5,1);
-    ekf filteri(Xi, Pi, Hi, Qi, Ri);
+    ekf filteri(Xi, Pi, hi, Qi, Ri);
 
-    i = 0;
+    float i = 0;
+    float noise = 0.5;
     while(i < time)
     {
         matrix<double> xxi(5,1);
@@ -117,7 +148,9 @@ int main()
         cout<<endl;
         phi = sin(d2r(50.0*i));
         for (int j =0; j<5; j++) true_vectori(j, 0) = (*(c.get_state()+j));
-        for (int j =0; j<5; j++) measurement_vectori(j, 0) = (*(c.get_noisy_state(noise)+j));
+        float orientation = c.get_noisy_theta(noise);
+        measurement_vectori = get_measurement_vector(acc, phi, orientation, noise, del_t);
+//        for (int j =0; j<5; j++) measurement_vectori(j, 0) = (*(c.get_noisy_state(noise)+j));
         cout<<"Measurement(S): "<<measurement_vectori<<endl;
         cout<<"True_State(S): "<<true_vectori<<endl;
         c.update(acc, phi, del_t);

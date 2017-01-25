@@ -133,7 +133,7 @@ ekf::ekf(matrix <double>& x, matrix <double> p, matrix <double> ih, matrix <doub
 
 ekf::~ekf() {}
 
-void ekf::get_state(matrix<double>& xx) { xx = X;}
+void ekf::get_state(matrix<double>& xx) {xx = X;}
 
 matrix<double> ekf::get_F( matrix <double>& control_vector, float del_t)
 {
@@ -153,6 +153,24 @@ matrix<double> ekf::get_F( matrix <double>& control_vector, float del_t)
     F(4,0) = 0; F(4,1) = 0; F(4,2) = 0; F(4,3) = 0; F(4,4) = 0;
 
     return F;
+}
+
+matrix<double> ekf::get_H(float del_t)
+{
+    double x = X(0,0);
+    double y = X(1,0);
+    double theta = X(2,0);
+    double v = X(3,0);
+    double beta = X(4,0);
+
+    matrix<double> H(5,5);
+    H(0,0) = 2/std::pow(del_t, 2); H(0,1) = 0; H(0,2) = -(2*v*cos(theta+beta))/(del_t*(theta+beta)); H(0,3) = 0; H(0,4) = (2*v*cos(theta+beta))/(theta+beta);
+    H(1,0) = 0; H(1,1) = 2/std::pow(del_t, 2); H(1,2) = -(2*v*sin(theta+beta))/(del_t*(theta+beta)); H(1,3) = 0; H(1,4) = (2*v*sin(theta+beta))/(theta+beta);
+    H(2,0) = 0; H(2,1) = 0; H(2,2) = 0; H(2,3) = 0; H(2,4) = 1;
+    H(3,0) = 0; H(3,1) = 0; H(3,2) = 0; H(3,3) = 1/del_t; H(3,4) = 0;
+    H(4,0) = 0; H(4,1) = 0; H(4,2) = 1/(theta+beta); H(4,3) = 0; H(4,4) = -del_t/(theta+beta);
+
+    return H;
 }
 
 matrix <double> ekf::predicted_X( matrix <double> &control_vector, float del_t)
@@ -180,6 +198,26 @@ matrix <double> ekf::predicted_X( matrix <double> &control_vector, float del_t)
     return new_X;
 }
 
+matrix <double> ekf::get_sensor_projected_state(matrix <double> &measurement_vector, float del_t)
+{
+
+    double theta = X(2,0);
+    double v = X(3,0);
+    double beta = X(4,0);
+
+    matrix<double> projected_state(5, 0);
+    matrix<double> hi (5, 5);
+    hi(0,0) = 0.5*std::pow(del_t, 2); hi(0,1) = 0; hi(0,2) = 0; hi(0,3) = 0; hi(0,4) = v*cos(theta+beta)*del_t;
+    hi(1,0) = 0; hi(1,1) = 0.5*std::pow(del_t, 2); hi(1,2) = 0; hi(0,4) = 0; hi(0,5) = v*sin(theta+beta)*del_t;
+    hi(2,0) = 0; hi(2,1) = 0; hi(2,2) = del_t; hi(2,3) = 0; hi(2,4) = theta+beta;
+    hi(3,0) = 0; hi(3,1) = 0; hi(3,2) = 0; hi(3,3) = del_t; hi(3,4) = 0;
+    hi(4,0) = 0; hi(4,1) = 0; hi(4,2) = 1; hi(4,3) = 0; hi(4,4) = 0;
+
+    projected_state = matrix<double> (prod(hi, measurement_vector));
+    return projected_state;
+}
+
+
 void ekf::step( matrix<double>& control_vector, matrix<double>& measurement_vector, float del_t)
 {
     matrix<double> predicted_x = predicted_X(control_vector, del_t);
@@ -187,8 +225,10 @@ void ekf::step( matrix<double>& control_vector, matrix<double>& measurement_vect
     matrix<double> predicted_P(5,5);
     predicted_P = matrix<double> (prod(matrix<double> (prod(F, P)),trans(F))) + Q;
 
-    matrix<double> diff = measurement_vector - predicted_x;
-    identity_matrix<double> H (5);
+    matrix<double> projected_state_vector = get_sensor_projected_state(measurement_vector, del_t);
+    matrix<double> diff = projected_state_vector - predicted_x;
+//    identity_matrix<double> H (5);
+    matrix <double> H = get_H(del_t);
     matrix<double> S = matrix<double> (prod(matrix<double> (prod(H,predicted_P)),trans(H))) + R;
 
     matrix<double> inverted_S(5,5);
