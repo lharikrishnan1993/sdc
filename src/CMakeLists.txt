@@ -19,6 +19,8 @@ target_link_libraries (ekf_observer rrt)
 target_link_libraries (ekf_observer car)
 target_link_libraries (ekf_observer utilities)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 install (TARGETS ekf_observer DESTINATION bin)
 install (FILES "${PROJECT_BINARY_DIR}/ekf_observer"        
          DESTINATION include)
