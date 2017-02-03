@@ -16,7 +16,13 @@
 #include "ekf_utilities.cpp"
 #include "car_utilities.cpp"
 
+<<<<<<< Updated upstream
 int main()
+=======
+#include <lqr.hpp>
+/*
+double get_noisy_acc(double acc, double noise)
+>>>>>>> Stashed changes
 {
     Car s;
 

@@ -7,21 +7,19 @@ include_directories("${PROJECT_BINARY_DIR}")
 include_directories ("${PROJECT_SOURCE_DIR}/ekf")
 include_directories ("${PROJECT_SOURCE_DIR}/rrt")
 include_directories ("${PROJECT_SOURCE_DIR}/car")
-include_directories ("${PROJECT_SOURCE_DIR}/lqr")
 include_directories ("${PROJECT_SOURCE_DIR}/utilities")
-
 add_subdirectory (ekf)
 add_subdirectory (rrt) 
 add_subdirectory (car) 
-add_subdirectory (lqr) 
 add_subdirectory (utilities) 
 
-add_executable(ekf_observer main.cpp)
+add_executable(ekf_observer ekf_observer.cpp)
 target_link_libraries (ekf_observer ekf)
 target_link_libraries (ekf_observer rrt)
 target_link_libraries (ekf_observer car)
-target_link_libraries (ekf_observer lqr)
 target_link_libraries (ekf_observer utilities)
+
+set(CMAKE_BUILD_TYPE Debug)
 
 install (TARGETS ekf_observer DESTINATION bin)
 install (FILES "${PROJECT_BINARY_DIR}/ekf_observer"        
